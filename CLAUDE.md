@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **rtk (Rust Token Killer)** is a high-performance CLI proxy that minimizes LLM token consumption by filtering and compressing command outputs. It achieves 60-90% token savings on common development operations through smart filtering, grouping, truncation, and deduplication.
 
-This is a fork with critical fixes for git argument parsing and modern JavaScript stack support (pnpm, vitest, Next.js, TypeScript, Playwright, Prisma).
+This is the canonical `rtk-ai/rtk` repository (default branch `develop`). It includes first-class support for modern JavaScript stacks (pnpm, vitest, Next.js, TypeScript, Playwright, Prisma) alongside git, cargo, go, python, and more.
 
 ### Name Collision Warning
 
@@ -16,7 +16,7 @@ This is a fork with critical fixes for git argument parsing and modern JavaScrip
 
 **Verify correct installation:**
 ```bash
-rtk --version  # Should show "rtk 0.28.2" (or newer)
+rtk --version  # Should show "rtk 0.42.x" (or newer; see Cargo.toml for current)
 rtk gain       # Should show token savings stats (NOT "command not found")
 ```
 
@@ -67,7 +67,9 @@ cargo generate-rpm            # RPM package (needs cargo-generate-rpm, after rel
 
 ## Architecture
 
-rtk uses a **command proxy architecture**: `main.rs` routes CLI commands via a Clap `Commands` enum to specialized filter modules in `src/cmds/*/`, each of which executes the underlying command and compresses its output. Token savings are tracked in SQLite via `src/core/tracking.rs`.
+rtk uses a **command proxy architecture**: `main.rs` routes CLI commands via a Clap `Commands` enum to specialized filter modules in `src/cmds/*/` (organized by ecosystem: git, rust, python, js, go, jvm, php, ruby, dotnet, cloud, system), each of which executes the underlying command and compresses its output. Token savings are tracked in SQLite via `src/core/tracking.rs`.
+
+Beyond `cmds/` and `core/`, `src/` has several first-class subsystems worth knowing: `parser/` (command/argument parsing), `filters/` (shared filtering primitives reused across ecosystems), `hooks/` (installs the Claude Code / OpenCode hooks via `rtk init`), `discover/` (command discovery), `learn/`, and `analytics/` (backs `rtk gain` reporting).
 
 For the full architecture, component details, and module development patterns, see:
 - [ARCHITECTURE.md](docs/contributing/ARCHITECTURE.md) — System design, module organization, filtering strategies, error handling
